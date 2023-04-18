@@ -130,8 +130,10 @@ StateInfo state_info(State state) {
 // των οποίων η συντεταγμένη x είναι ανάμεσα στο x_from και x_to.
 
 List state_objects(State state, float x_from, float x_to) {
-	// Προς υλοποίηση
-	return NULL;
+	List list_objects = list_create(free);
+	for (int i = 0; i < vector_size(state->objects); i++)
+		list_insert_next(list_objects, list_last(list_objects), vector_get_at(state->objects, i));
+	return list_objects;
 }
 
 // Ενημερώνει την κατάσταση state του παιχνιδιού μετά την πάροδο 1 frame.
