@@ -59,7 +59,7 @@ static void add_objects(State state, float start_x) {
 			SCREEN_HEIGHT/4 + rand() % SCREEN_HEIGHT/2,			// y τυχαία στο διάστημα [SCREEN_HEIGHT/4, 3*SCREEN_HEIGHT/4]
 			i == 0 ? 250 : 50 + rand()%200,						// πλάτος τυχαία στο διάστημα [50, 250] (η πρώτη πάντα 250)
 			20,													// ύψος
-			i < 3 || rand() % 2 == 0 ? MOVING_UP : MOVING_DOWN,	// τυχαία αρχική κίνηση (οι πρώτες 3 πάντα πάνω)
+			i < 3 || () % 2 == 0 ? MOVING_UP : MOVING_DOWN,	// τυχαία αρχική κίνηση (οι πρώτες 3 πάντα πάνω)
 			0.6 + 3*(rand()%100)/100,							// ταχύτητα τυχαία στο διάστημα [0.6, 3.6]
 			i > 0 && (rand() % 10) == 0							// το 10% (τυχαία) των πλατφορμών είναι ασταθείς (εκτός από την πρώτη)
 		);
@@ -118,8 +118,12 @@ State state_create() {
 // Επιστρέφει τις βασικές πληροφορίες του παιχνιδιού στην κατάσταση state
 
 StateInfo state_info(State state) {
-	// Προς υλοποίηση
-	return NULL;
+	StateInfo stateinfo = malloc(sizeof(state_info));
+	stateinfo->ball = vector_get_at(state->objects, BALL);
+	stateinfo->playing = state->info.playing;
+	stateinfo->paused = state->info.paused;
+	stateinfo->score = state->info.score;
+	return stateinfo;
 }
 
 // Επιστρέφει μια λίστα με όλα τα αντικείμενα του παιχνιδιού στην κατάσταση state,
