@@ -126,13 +126,13 @@ StateInfo state_info(State state) {
 
 List state_objects(State state, float x_from, float x_to) {
 	List objects = list_create(NULL);
-	for (ListNode list_node = list_first(state->objects);
-	list_node != LIST_EOF;
-	list_node = list_next(state->objects, list_node))
+	for (VectorNode node = vector_first(state->objects);
+	node != VECTOR_EOF;
+	node = vector_next(state->objects, node))
 	{
-		Object obj = list_node_value(state->objects, list_node);
+		Object obj = vector_node_value(state->objects, node);
 		if (obj->rect.x >= x_from && obj->rect.x <= x_to)
-			list_insert_next(objects, list_node, obj);
+			list_insert_next(objects, node, obj);
 	}
 	return objects;
 }
