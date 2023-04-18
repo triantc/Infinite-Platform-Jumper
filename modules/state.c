@@ -118,22 +118,23 @@ State state_create() {
 // Επιστρέφει τις βασικές πληροφορίες του παιχνιδιού στην κατάσταση state
 
 StateInfo state_info(State state) {
-	StateInfo stateinfo = malloc(sizeof(state_info));
-	stateinfo->ball = vector_get_at(state->objects, BALL);
-	stateinfo->playing = state->info.playing;
-	stateinfo->paused = state->info.paused;
-	stateinfo->score = state->info.score;
-	return stateinfo;
+	return &state->info;
 }
 
 // Επιστρέφει μια λίστα με όλα τα αντικείμενα του παιχνιδιού στην κατάσταση state,
 // των οποίων η συντεταγμένη x είναι ανάμεσα στο x_from και x_to.
 
 List state_objects(State state, float x_from, float x_to) {
-	List list_objects = list_create(free);
-	for (int i = 0; i < vector_size(state->objects); i++)
-		list_insert_next(list_objects, list_last(list_objects), vector_get_at(state->objects, i));
-	return list_objects;
+	List objects = list_create(NULL);
+	for (ListNode list_node = list_first(state->objects);
+	list_node != LIST_EOF;
+	list_node = list_next(state->objects, list_node))
+	{
+		Object obj = list_node_value(state->objects, list_node);
+		if (obj->rect.x >= x_from && obj->rect.x <= x_to)
+			list_insert_next(objects, list_node, obj);
+	}
+	return objects;
 }
 
 // Ενημερώνει την κατάσταση state του παιχνιδιού μετά την πάροδο 1 frame.
