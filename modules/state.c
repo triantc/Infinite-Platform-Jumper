@@ -132,7 +132,7 @@ List state_objects(State state, float x_from, float x_to) {
 	{
 		Object obj = vector_node_value(state->objects, node);
 		if (obj->rect.x >= x_from && obj->rect.x <= x_to)
-			list_insert_next(objects, LIST_BOF, obj);
+			list_insert_next(objects, list_last(objects), obj);
 	}
 	return objects;
 }

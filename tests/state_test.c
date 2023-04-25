@@ -21,6 +21,37 @@ void test_state_create() {
 	TEST_ASSERT(info->score == 0);
 
 	// Προσθέστε επιπλέον ελέγχους
+	TEST_ASSERT(info->ball != NULL);
+
+	List objs = state_objects(state, 0, SCREEN_WIDTH);
+	TEST_ASSERT(objs != NULL);
+	TEST_ASSERT(list_size(objs) >= 2);
+
+	float start_x = 150;
+	for (ListNode node = list_first(objs);
+	node != LIST_EOF;
+	node = list_next(objs, node))
+	{
+		Object obj = list_node_value(objs, node);
+		if (obj->type == PLATFORM)
+		{	
+			TEST_ASSERT(obj->rect.x >= start_x);
+			start_x = obj->rect.x + obj->rect.width;
+			TEST_ASSERT(obj->rect.y > SCREEN_HEIGHT/4);
+			TEST_ASSERT(obj->rect.width >= 50);
+			TEST_ASSERT(obj->rect.height == 20);
+			TEST_ASSERT(obj->vert_speed >= 0.6 && obj->vert_speed <= 3.6);
+		}
+		if (obj->type == STAR)
+		{	
+			TEST_ASSERT(obj->rect.x >= start_x);
+			start_x += obj->rect.x + obj->rect.width;
+			// TEST_ASSERT(obj->rect.y > SCREEN_HEIGHT/4);
+			// TEST_ASSERT(obj->rect.width >= 50);
+			// TEST_ASSERT(obj->rect.height == 20);
+			// TEST_ASSERT(obj->vert_speed >= 0.6 && obj->vert_speed <= 3.6);
+		}
+	}
 }
 
 void test_state_update() {
