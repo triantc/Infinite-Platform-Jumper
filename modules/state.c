@@ -141,7 +141,66 @@ List state_objects(State state, float x_from, float x_to) {
 // Το keys περιέχει τα πλήκτρα τα οποία ήταν πατημένα κατά το frame αυτό.
 
 void state_update(State state, KeyState keys) {
-	// Προς υλοποίηση
+	// Οριζόντια κίνηση μπάλας
+	if (keys->right)
+		state->info.ball->rect.x += 6;
+	else if (keys->left)
+		state->info.ball->rect.x += 1;
+	else
+		state->info.ball->rect.x += 4;
+	
+	// Κατακόρυφη κίνηση μπάλας
+	if (state->info.ball->vert_mov == JUMPING)
+	{
+		state->info.ball->rect.y -= state->info.ball->vert_speed;
+		state->info.ball->vert_speed *= 0.85;
+		if (state->info.ball->vert_speed <= 0.5)
+			state->info.ball->vert_mov = FALLING;
+	}
+	else if (state->info.ball->vert_mov == FALLING)
+	{
+		state->info.ball->rect.y += state->info.ball->vert_speed;
+		if (state->info.ball->vert_speed < 7)
+			state->info.ball->vert_speed *= 1.1;
+	}
+	else if (state->info.ball->vert_mov == IDLE && keys->up)
+	{
+		state->info.ball->vert_mov = JUMPING;
+		state->info.ball->vert_speed = 17;
+	}
+	
+	// Κατακόρυφη κίνηση πλατφόρμας
+	for (VectorNode node = vector_first(state->objects);
+	node != VECTOR_EOF;
+	node = vector_next(state->objects, node))
+	{
+		Object obj = vector_node_value(state->objects, node);
+		if (obj->type == PLATFORM)
+		{
+			if (obj->vert_mov == MOVING_UP)
+			{
+				obj->rect.y -= obj->vert_speed;
+				if (obj->rect.y <= SCREEN_HEIGHT/4)
+					obj->vert_mov = MOVING_DOWN;
+			}
+			else if (obj->vert_mov == MOVING_DOWN)
+			{
+				obj->rect.y += obj->vert_speed;
+				if (obj->rect.y >= 3*SCREEN_HEIGHT/4)
+					obj->vert_mov = MOVING_UP;
+			}
+			else if (obj->vert_mov == FALLING)
+				obj->rect.y += 4;
+		}
+	}
+	
+	// Εκκίνηση και διακοπή
+	if (state->info.playing == false && keys->enter)
+		state->info.playing = true;
+	if (keys->p)
+		state->info.paused = true;
+	if (keys->n && state->info.paused == true)
+		state_update(state, keys);
 }
 
 // Καταστρέφει την κατάσταση state ελευθερώνοντας τη δεσμευμένη μνήμη.

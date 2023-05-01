@@ -86,6 +86,31 @@ void test_state_update() {
 	TEST_CHECK( new_rect.x == old_rect.x + 6 );
 
 	// Προσθέστε επιπλέον ελέγχους
+
+	// Με πατημένο το αριστερό βέλος, η μπάλα μετακινείται 1 pixel δεξιά
+	keys.right = false;
+	keys.left = true;
+	old_rect = state_info(state)->ball->rect;
+	state_update(state, &keys);
+	new_rect = state_info(state)->ball->rect;
+	TEST_ASSERT( new_rect.x == old_rect.x + 1 );
+	keys.left = false;
+
+	// Όταν vert_mov == JUMPING
+	state_info(state)->ball->vert_mov = JUMPING;
+	state_info(state)->ball->vert_speed = 0.5;
+	state_update(state, &keys); 
+	new_rect = state_info(state)->ball->rect;
+	TEST_ASSERT( new_rect.y == old_rect.y - 0.5);
+	// Μετά το update θα γίνει vert_mov = FALLING επειδή το vert_speed = 0.5 * 0.85 <= 0.5
+	TEST_ASSERT(state_info(state)->ball->vert_mov == FALLING);
+
+	// Όταν vert_mov == IDLE και πατημένο το πάνω βέλος
+	state_info(state)->ball->vert_mov = IDLE;
+	keys.up = true;
+	state_update(state, &keys);
+	TEST_ASSERT(state_info(state)->ball->vert_mov == JUMPING);
+	TEST_ASSERT(state_info(state)->ball->vert_speed == 17);
 }
 
 
