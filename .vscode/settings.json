@@ -29,6 +29,8 @@
 		"arg8": "#",
 	},
 	"files.associations": {
-		"stdio.h": "c"
+		"stdio.h": "c",
+		"adtset.h": "c",
+		"state.h": "c"
 	},
 }

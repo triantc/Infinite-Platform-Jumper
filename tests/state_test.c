@@ -5,7 +5,7 @@
 //////////////////////////////////////////////////////////////////
 
 #include "acutest.h"			// Απλή βιβλιοθήκη για unit testing
-
+#include "../modules/set_utils.h"
 #include "state.h"
 
 void test_state_create() {
@@ -64,11 +64,11 @@ void test_state_create() {
 }
 
 int compare(Pointer a, Pointer b)
-	{
-		Object ia = a;
-		Object ib = b;
-		return ia->rect.x - ib->rect.x;
-	}
+{
+	Object ia = a;
+	Object ib = b;
+	return ia->rect.x - ib->rect.x;
+}
 
 void test_state_update() {
 	State state = state_create();
@@ -161,18 +161,42 @@ void test_state_update() {
 			TEST_ASSERT(list_find_node(objs, node, compare) == NULL);
 		}
 	}
+}
 
+int compare_ints(Pointer a, Pointer b)
+{
+    int* ia = a;
+    int* ib = b;
+    return *ia - *ib;
+}
 
-
-
-
-
-
+int* create_int(int value)
+{
+    int* pointer = malloc(sizeof(int));
+    *pointer = value;
+    return pointer;
 }
 
 
+void test_set_utils()
+{
+    Set set = set_create(compare_ints, NULL);
+    int values[3] = {5, 10, 15};
+    for (int i = 0; i < 3; i++)
+        set_insert(set, create_int(values[i]));
+    int* x = set_find_eq_or_greater(set, create_int(10));
+    TEST_ASSERT(*x == 10);
+	// Αφαιρώ το 10 από το set και ξαναελέγχω
+	set_remove(set, x); 
+	x = set_find_eq_or_greater(set, create_int(10));
+	TEST_ASSERT(*x == 15);
+	x = set_find_eq_or_smaller(set, create_int(10));
+	TEST_ASSERT(*x == 5);
+}
+
 // Λίστα με όλα τα tests προς εκτέλεση
 TEST_LIST = {
+	{ "test_set_utils", test_set_utils },
 	{ "test_state_create", test_state_create },
 	{ "test_state_update", test_state_update },
 
