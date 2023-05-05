@@ -170,27 +170,26 @@ int compare_ints(Pointer a, Pointer b)
     return *ia - *ib;
 }
 
-int* create_int(int value)
+int* create_int1(int value)
 {
     int* pointer = malloc(sizeof(int));
     *pointer = value;
     return pointer;
 }
 
-
 void test_set_utils()
 {
     Set set = set_create(compare_ints, NULL);
     int values[3] = {5, 10, 15};
     for (int i = 0; i < 3; i++)
-        set_insert(set, create_int(values[i]));
-    int* x = set_find_eq_or_greater(set, create_int(10));
+        set_insert(set, create_int1(values[i]));
+    int* x = set_find_eq_or_greater(set, create_int1(10));
     TEST_ASSERT(*x == 10);
 	// Αφαιρώ το 10 από το set και ξαναελέγχω
 	set_remove(set, x); 
-	x = set_find_eq_or_greater(set, create_int(10));
+	x = set_find_eq_or_greater(set, create_int1(10));
 	TEST_ASSERT(*x == 15);
-	x = set_find_eq_or_smaller(set, create_int(10));
+	x = set_find_eq_or_smaller(set, create_int1(10));
 	TEST_ASSERT(*x == 5);
 }
 

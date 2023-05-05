@@ -141,69 +141,37 @@ List state_objects(State state, float x_from, float x_to) {
 // Το keys περιέχει τα πλήκτρα τα οποία ήταν πατημένα κατά το frame αυτό.
 
 void state_update(State state, KeyState keys) {
-	// Οριζόντια κίνηση μπάλας
-	if (keys->right)
-		state->info.ball->rect.x += 6;
-	else if (keys->left)
-		state->info.ball->rect.x += 1;
-	else
-		state->info.ball->rect.x += 4;
-	
-	// Κατακόρυφη κίνηση μπάλας
-	if (state->info.ball->vert_mov == JUMPING)
-	{
-		state->info.ball->rect.y -= state->info.ball->vert_speed;
-		state->info.ball->vert_speed *= 0.85;
-		if (state->info.ball->vert_speed <= 0.5)
-			state->info.ball->vert_mov = FALLING;
-	}
-	else if (state->info.ball->vert_mov == FALLING)
-	{
-		state->info.ball->rect.y += state->info.ball->vert_speed;
-		if (state->info.ball->vert_speed < 7)
-			state->info.ball->vert_speed *= 1.1;
-	}
-	else if (state->info.ball->vert_mov == IDLE && keys->up)
-	{
-		state->info.ball->vert_mov = JUMPING;
-		state->info.ball->vert_speed = 17;
-	}
-	
-	// Κατακόρυφη κίνηση πλατφόρμας
-	for (VectorNode node = vector_first(state->objects);
-	node != VECTOR_EOF;
-	node = vector_next(state->objects, node))
-	{
-		Object obj = vector_node_value(state->objects, node);
-		if (obj->type == PLATFORM)
-		{
-			if (obj->vert_mov == MOVING_UP)
-			{
-				obj->rect.y -= obj->vert_speed;
-				if (obj->rect.y <= SCREEN_HEIGHT/4)
-					obj->vert_mov = MOVING_DOWN;
-			}
-			else if (obj->vert_mov == MOVING_DOWN)
-			{
-				obj->rect.y += obj->vert_speed;
-				if (obj->rect.y >= 3*SCREEN_HEIGHT/4)
-					obj->vert_mov = MOVING_UP;
-			}
-			else if (obj->vert_mov == FALLING)
-				obj->rect.y += 4;
-		}
-	}
-	
-	// Εκκίνηση και διακοπή
-	if (state->info.playing == false && keys->enter)
-		state->info.playing = true;
-	if (keys->p)
-		state->info.paused = !state->info.paused;
-	if (keys->n && state->info.paused == true)
-		state_update(state, keys);
 
-	// Συμπεριφορά μπάλας σε κατακόρυφη ηρεμία (IDLE)
-	if (state->info.ball->vert_mov == IDLE)
+	if (state->info.playing) {
+		// Οριζόντια κίνηση μπάλας
+		if (keys->right)
+			state->info.ball->rect.x += 6;
+		else if (keys->left)
+			state->info.ball->rect.x += 1;
+		else
+			state->info.ball->rect.x += 4;
+		
+		// Κατακόρυφη κίνηση μπάλας
+		if (state->info.ball->vert_mov == JUMPING)
+		{
+			state->info.ball->rect.y -= state->info.ball->vert_speed;
+			state->info.ball->vert_speed *= 0.85;
+			if (state->info.ball->vert_speed <= 0.5)
+				state->info.ball->vert_mov = FALLING;
+		}
+		else if (state->info.ball->vert_mov == FALLING)
+		{
+			state->info.ball->rect.y += state->info.ball->vert_speed;
+			if (state->info.ball->vert_speed < 7)
+				state->info.ball->vert_speed *= 1.1;
+		}
+		else if (state->info.ball->vert_mov == IDLE && keys->up)
+		{
+			state->info.ball->vert_mov = JUMPING;
+			state->info.ball->vert_speed = 17;
+		}
+		
+		// Κατακόρυφη κίνηση πλατφόρμας
 		for (VectorNode node = vector_first(state->objects);
 		node != VECTOR_EOF;
 		node = vector_next(state->objects, node))
@@ -211,75 +179,115 @@ void state_update(State state, KeyState keys) {
 			Object obj = vector_node_value(state->objects, node);
 			if (obj->type == PLATFORM)
 			{
-				if (state->info.ball->rect.x + state->info.ball->rect.width >= obj->rect.x 
+				if (obj->vert_mov == MOVING_UP)
+				{
+					obj->rect.y -= obj->vert_speed;
+					if (obj->rect.y <= SCREEN_HEIGHT/4)
+						obj->vert_mov = MOVING_DOWN;
+				}
+				else if (obj->vert_mov == MOVING_DOWN)
+				{
+					obj->rect.y += obj->vert_speed;
+					if (obj->rect.y >= 3*SCREEN_HEIGHT/4)
+						obj->vert_mov = MOVING_UP;
+				}
+				else if (obj->vert_mov == FALLING)
+					obj->rect.y += 4;
+			}
+		}
+		
+		// Εκκίνηση και διακοπή
+		if (state->info.playing == false && keys->enter)
+			state->info.playing = true;
+		if (keys->p)
+			state->info.paused = !state->info.paused;
+		if (keys->n && state->info.paused == true)
+			state_update(state, keys);
+
+		// Συμπεριφορά μπάλας σε κατακόρυφη ηρεμία (IDLE)
+		if (state->info.ball->vert_mov == IDLE)
+			for (VectorNode node = vector_first(state->objects);
+			node != VECTOR_EOF;
+			node = vector_next(state->objects, node))
+			{
+				Object obj = vector_node_value(state->objects, node);
+				if (obj->type == PLATFORM)
+				{
+					if (state->info.ball->rect.x + state->info.ball->rect.width >= obj->rect.x 
+					&& state->info.ball->rect.x <= obj->rect.x + obj->rect.width
+					&& state->info.ball->rect.y + state->info.ball->rect.height == obj->rect.y)
+					{
+						state->info.ball->rect.y = obj->rect.y - state->info.ball->rect.height;
+					}
+					else
+					{
+						state->info.ball->vert_mov = FALLING;
+						state->info.ball->vert_speed = 1.5;
+					}
+				}
+			}
+		
+		// Συγκρούσεις
+		if (state->info.ball->rect.y >= SCREEN_HEIGHT - state->info.ball->rect.height)
+			state->info.playing = false;
+
+		float max_platform_x = 0, max_platform_width = 0;  // Χρησιμέυει στη δημιουργία νέων αντικειμένων αργότερα
+		for (VectorNode node = vector_first(state->objects);
+		node != VECTOR_EOF;
+		node = vector_next(state->objects, node))
+		{
+			Object obj = vector_node_value(state->objects, node);
+			if (obj->type == STAR)
+			{
+				if (/* state->info.ball->rect.x + state->info.ball->rect.width >= obj->rect.x 
+				&& state->info.ball->rect.y + state->info.ball->rect.height >= obj->rect.y 
+				&& state->info.ball->rect.y <= obj->rect.y + obj->rect.height 
+				&& state->info.ball->rect.x <= obj->rect.x + obj->rect.width */
+				CheckCollisionRecs(state->info.ball->rect, obj->rect))
+				{
+					vector_set_at(state->objects, vector_size(state->objects) - 1, vector_last(state->objects));
+					vector_remove_last(state->objects);
+					state->info.score += 10;
+				}
+			}
+
+			if (obj->type == PLATFORM)
+			{
+				if (obj->vert_mov == FALLING && obj->rect.y + obj->rect.height >= SCREEN_HEIGHT)
+				{
+					vector_set_at(state->objects, vector_size(state->objects) - 1, vector_last(state->objects));
+					vector_remove_last(state->objects);
+				}
+				if (state->info.ball->vert_mov == FALLING 
+				&& state->info.ball->rect.x + state->info.ball->rect.width >= obj->rect.x 
 				&& state->info.ball->rect.x <= obj->rect.x + obj->rect.width
 				&& state->info.ball->rect.y + state->info.ball->rect.height == obj->rect.y)
 				{
+					state->info.ball->vert_mov = IDLE;
 					state->info.ball->rect.y = obj->rect.y - state->info.ball->rect.height;
 				}
-				else
+
+				// Χρησιμέυει στη δημιουργία νέων αντικειμένων αργότερα
+				if (obj->rect.x > max_platform_x)
 				{
-					state->info.ball->vert_mov = FALLING;
-					state->info.ball->vert_speed = 1.5;
+					max_platform_x = obj->rect.x;
+					max_platform_width = obj->rect.width;
 				}
 			}
 		}
-	
-	// Συγκρούσεις
-	if (state->info.ball->rect.y >= SCREEN_HEIGHT - state->info.ball->rect.height)
-		state->info.playing = false;
-
-	float max_platform_x = 0, max_platform_width = 0;  // Χρησιμέυει στη δημιουργία νέων αντικειμένων αργότερα
-	for (VectorNode node = vector_first(state->objects);
-	node != VECTOR_EOF;
-	node = vector_next(state->objects, node))
-	{
-		Object obj = vector_node_value(state->objects, node);
-		if (obj->type == STAR)
+		
+		// Δημιουργία νέων αντικειμένων
+		if (max_platform_x - state->info.ball->rect.x <= SCREEN_WIDTH)
 		{
-			if (/* state->info.ball->rect.x + state->info.ball->rect.width >= obj->rect.x 
-			&& state->info.ball->rect.y + state->info.ball->rect.height >= obj->rect.y 
-			&& state->info.ball->rect.y <= obj->rect.y + obj->rect.height 
-			&& state->info.ball->rect.x <= obj->rect.x + obj->rect.width */
-			CheckCollisionRecs(state->info.ball->rect, obj->rect))
-			{
-				vector_set_at(state->objects, vector_size(state->objects) - 1, vector_last(state->objects));
-				vector_remove_last(state->objects);
-				state->info.score += 10;
-			}
+			add_objects(state, max_platform_x + max_platform_width);
+			state->speed_factor *= 1.1; 				 //////////////////////   ΝΑ ΕΦΑΡΜΟΣΤΕΙ ///////////////////////
 		}
-
-		if (obj->type == PLATFORM)
-		{
-			if (obj->vert_mov == FALLING && obj->rect.y + obj->rect.height >= SCREEN_HEIGHT)
-			{
-				vector_set_at(state->objects, vector_size(state->objects) - 1, vector_last(state->objects));
-				vector_remove_last(state->objects);
-			}
-			if (state->info.ball->vert_mov == FALLING 
-			&& state->info.ball->rect.x + state->info.ball->rect.width >= obj->rect.x 
-			&& state->info.ball->rect.x <= obj->rect.x + obj->rect.width
-			&& state->info.ball->rect.y + state->info.ball->rect.height == obj->rect.y)
-			{
-				state->info.ball->vert_mov = IDLE;
-				state->info.ball->rect.y = obj->rect.y - state->info.ball->rect.height;
-			}
-
-			// Χρησιμέυει στη δημιουργία νέων αντικειμένων αργότερα
-			if (obj->rect.x > max_platform_x)
-			{
-				max_platform_x = obj->rect.x;
-				max_platform_width = obj->rect.width;
-			}
-		}
+		
+	} else if (keys->enter) {
+		state_create();			// επαναφορά στην αρχική κατάσταση
 	}
+
 	
-	// Δημιουργία νέων αντικειμένων
-	if (max_platform_x - state->info.ball->rect.x <= SCREEN_WIDTH)
-	{
-		add_objects(state, max_platform_x + max_platform_width);
-		state->speed_factor *= 1.1; 				 //////////////////////   ΝΑ ΕΦΑΡΜΟΣΤΕΙ ///////////////////////
-	}
 }
 
 // Καταστρέφει την κατάσταση state ελευθερώνοντας τη δεσμευμένη μνήμη.
