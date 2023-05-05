@@ -10,7 +10,7 @@ Sound game_over_snd;
 
 void interface_init() {
 	// Αρχικοποίηση του παραθύρου
-	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "game_example");
+	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "game");
 	SetTargetFPS(60);
     InitAudioDevice();
 
@@ -34,26 +34,46 @@ void interface_draw_frame(State state) {
 	// Σχεδιάζουμε τον χαρακτήρα και τις 2 μπάλες
     StateInfo info = state_info(state);
     
-	DrawRectangle(bird_img, state->character.x, state->character.y, WHITE);
-	DrawRectangle(state->ball1.position.x, state->ball1.position.y, state->ball1.radius, RED);
-	DrawCircle(state->ball2.position.x, state->ball2.position.y, state->ball2.radius, RED);
+	float ball_x = info->ball->rect.x;
+	float offset_x = SCREEN_WIDTH - 700 - ball_x;
 
+	DrawTexture(bird_img, SCREEN_WIDTH/3, info->ball->rect.y, WHITE);
+
+	List objs = state_objects(state, ball_x - SCREEN_WIDTH, ball_x + SCREEN_WIDTH);
+
+	for (ListNode node = list_first(objs);
+	node != LIST_EOF;
+	node = list_next(objs, node))
+	{
+		Object obj = list_node_value(objs, node);
+		if (obj->type == PLATFORM)
+		{
+			if (obj->unstable)
+			{
+				/* code */
+			}
+			DrawRectangle(obj->rect.x + offset_x, obj->rect.y, obj->rect.width, obj->rect.height, GREEN);
+			
+		}
+		if (obj->type == STAR)
+		{
+			DrawCircle(obj->rect.x + offset_x, obj->rect.y, 20, YELLOW);
+		}
+		
+	}
+	
 	// Σχεδιάζουμε το σκορ και το FPS counter
-	DrawText(TextFormat("%04i", state->score), 20, 20, 40, GRAY);
+	DrawText(TextFormat("%04i", info->score), 20, 20, 40, GRAY);
 	DrawFPS(SCREEN_WIDTH - 80, 0);
 
 	// Αν το παιχνίδι έχει τελειώσει, σχεδιάζομαι το μήνυμα για να ξαναρχίσει
-	if (!state->playing) {
+	if (!info->playing) {
 		DrawText(
 			"PRESS [ENTER] TO PLAY AGAIN",
 			 GetScreenWidth() / 2 - MeasureText("PRESS [ENTER] TO PLAY AGAIN", 20) / 2,
 			 GetScreenHeight() / 2 - 50, 20, GRAY
 		);
 	}
-
-	// Ηχος, αν είμαστε στο frame που συνέβη το game_over
-	if(state->game_over)
-		PlaySound(game_over_snd);
 
 	EndDrawing();
 }

@@ -245,7 +245,7 @@ void state_update(State state, KeyState keys) {
                 {
                     if (state->info.ball->rect.x + state->info.ball->rect.width >= obj->rect.x 
                     && state->info.ball->rect.x <= obj->rect.x + obj->rect.width
-                    && state->info.ball->rect.y + state->info.ball->rect.height == obj->rect.y)
+                    && (int)state->info.ball->rect.y + (int)state->info.ball->rect.height == (int)obj->rect.y)
                     {
                         state->info.ball->rect.y = obj->rect.y - state->info.ball->rect.height;
                     }
@@ -289,9 +289,10 @@ void state_update(State state, KeyState keys) {
                     list_remove_next(objects, previous_node);
                 }
                 if (state->info.ball->vert_mov == FALLING 
-                && state->info.ball->rect.x + state->info.ball->rect.width >= obj->rect.x 
-                && state->info.ball->rect.x <= obj->rect.x + obj->rect.width
-                && state->info.ball->rect.y + state->info.ball->rect.height == obj->rect.y)
+				/*&& state->info.ball->rect.x + state->info.ball->rect.width >= obj->rect.x 
+				&& state->info.ball->rect.x <= obj->rect.x + obj->rect.width
+				&& state->info.ball->rect.y + state->info.ball->rect.height == obj->rect.y*/
+				&& CheckCollisionRecs(state->info.ball->rect, obj->rect))
                 {
                     state->info.ball->vert_mov = IDLE;
                     state->info.ball->rect.y = obj->rect.y - state->info.ball->rect.height;

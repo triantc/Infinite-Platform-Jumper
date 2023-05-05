@@ -259,9 +259,10 @@ void state_update(State state, KeyState keys) {
 					vector_remove_last(state->objects);
 				}
 				if (state->info.ball->vert_mov == FALLING 
-				&& state->info.ball->rect.x + state->info.ball->rect.width >= obj->rect.x 
+				/*&& state->info.ball->rect.x + state->info.ball->rect.width >= obj->rect.x 
 				&& state->info.ball->rect.x <= obj->rect.x + obj->rect.width
-				&& state->info.ball->rect.y + state->info.ball->rect.height == obj->rect.y)
+				&& state->info.ball->rect.y + state->info.ball->rect.height == obj->rect.y*/
+				&& CheckCollisionRecs(state->info.ball->rect, obj->rect))
 				{
 					state->info.ball->vert_mov = IDLE;
 					state->info.ball->rect.y = obj->rect.y - state->info.ball->rect.height;
