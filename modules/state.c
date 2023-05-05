@@ -145,11 +145,11 @@ void state_update(State state, KeyState keys) {
 	if (state->info.playing) {
 		// Οριζόντια κίνηση μπάλας
 		if (keys->right)
-			state->info.ball->rect.x += 6;
+			state->info.ball->rect.x += 6 * state->speed_factor;
 		else if (keys->left)
-			state->info.ball->rect.x += 1;
+			state->info.ball->rect.x += 1 * state->speed_factor;
 		else
-			state->info.ball->rect.x += 4;
+			state->info.ball->rect.x += 4 * state->speed_factor;
 		
 		// Κατακόρυφη κίνηση μπάλας
 		if (state->info.ball->vert_mov == JUMPING)
@@ -196,13 +196,7 @@ void state_update(State state, KeyState keys) {
 			}
 		}
 		
-		// Εκκίνηση και διακοπή
-		if (state->info.playing == false && keys->enter)
-			state->info.playing = true;
-		if (keys->p)
-			state->info.paused = !state->info.paused;
-		if (keys->n && state->info.paused == true)
-			state_update(state, keys);
+		
 
 		// Συμπεριφορά μπάλας σε κατακόρυφη ηρεμία (IDLE)
 		if (state->info.ball->vert_mov == IDLE)
@@ -281,9 +275,17 @@ void state_update(State state, KeyState keys) {
 			state->speed_factor *= 1.1; 				 //////////////////////   ΝΑ ΕΦΑΡΜΟΣΤΕΙ ///////////////////////
 		}
 		
+		// Εκκίνηση και διακοπή
+		if (state->info.playing == false && keys->enter)
+			state->info.playing = true;
+		if (keys->p)
+			state->info.paused = !state->info.paused;
+		if (keys->n && state->info.paused == true)
+			state_update(state, keys);
 	} 
 	else if (keys->enter) 
 	{
+		state_destroy(state);
 		state_create();			// επαναφορά στην αρχική κατάσταση
 	}
 
@@ -294,4 +296,6 @@ void state_update(State state, KeyState keys) {
 
 void state_destroy(State state) {
 	// Προς υλοποίηση
+	free(state->objects);
+	free(state);
 }
