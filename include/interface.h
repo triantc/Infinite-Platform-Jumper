@@ -1,3 +1,4 @@
+#pragma once
 #include "state.h"
 
 // Αρχικοποιεί το interface του παιχνιδιού
