@@ -4,7 +4,8 @@
 #include "interface.h"
 
 // Assets
-Texture bird_img;
+Texture ghost_png;
+Texture bitcoin_png;
 Sound game_over_snd;
 
 
@@ -15,7 +16,8 @@ void interface_init() {
     InitAudioDevice();
 
 	// Φόρτωση εικόνων και ήχων
-	bird_img = LoadTextureFromImage(LoadImage("assets/bird.png"));
+	bitcoin_png = LoadTextureFromImage(LoadImage("assets/bitcoin.png"));
+	ghost_png = LoadTextureFromImage(LoadImage("assets/ghost.png"));
 	game_over_snd = LoadSound("assets/game_over.mp3");
 }
 
@@ -29,15 +31,15 @@ void interface_draw_frame(State state) {
 	BeginDrawing();
 
 	// Καθαρισμός, θα τα σχεδιάσουμε όλα από την αρχή
-	ClearBackground(RAYWHITE);
+	ClearBackground(BLACK);
 
 	// Σχεδιάζουμε τον χαρακτήρα και τις 2 μπάλες
     StateInfo info = state_info(state);
     
 	float ball_x = info->ball->rect.x;
-	float offset_x = SCREEN_WIDTH - 700 - ball_x;
+	float offset_x = SCREEN_WIDTH/3 - ball_x;
 
-	DrawTexture(bird_img, SCREEN_WIDTH/3, info->ball->rect.y, WHITE);
+	DrawTexture(ghost_png, offset_x + ball_x, info->ball->rect.y, WHITE);
 
 	List objs = state_objects(state, ball_x - SCREEN_WIDTH, ball_x + SCREEN_WIDTH);
 
@@ -49,21 +51,18 @@ void interface_draw_frame(State state) {
 		if (obj->type == PLATFORM)
 		{
 			if (obj->unstable)
-			{
-				/* code */
-			}
-			DrawRectangle(obj->rect.x + offset_x, obj->rect.y, obj->rect.width, obj->rect.height, GREEN);
-			
+				DrawRectangle(obj->rect.x + offset_x, obj->rect.y, obj->rect.width, obj->rect.height, MAGENTA);
+			else
+				DrawRectangle(obj->rect.x + offset_x, obj->rect.y, obj->rect.width, obj->rect.height, GOLD);
 		}
 		if (obj->type == STAR)
 		{
-			DrawCircle(obj->rect.x + offset_x, obj->rect.y, 20, YELLOW);
+			DrawTexture(bitcoin_png, obj->rect.x + offset_x, obj->rect.y, WHITE);
 		}
-		
 	}
 	
 	// Σχεδιάζουμε το σκορ και το FPS counter
-	DrawText(TextFormat("%04i", info->score), 20, 20, 40, GRAY);
+	DrawText(TextFormat("%04i", info->score), 20, 20, 40, WHITE);
 	DrawFPS(SCREEN_WIDTH - 80, 0);
 
 	// Αν το παιχνίδι έχει τελειώσει, σχεδιάζομαι το μήνυμα για να ξαναρχίσει

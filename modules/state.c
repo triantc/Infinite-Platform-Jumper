@@ -231,6 +231,7 @@ void state_update(State state, KeyState keys) {
 		if (state->info.ball->rect.y >= SCREEN_HEIGHT - state->info.ball->rect.height)
 			state->info.playing = false;
 
+		int position = 0; // Μεταβλητή για να αφαιρώ object από το vector
 		float max_platform_x = 0, max_platform_width = 0;  // Χρησιμέυει στη δημιουργία νέων αντικειμένων αργότερα
 		for (VectorNode node = vector_first(state->objects);
 		node != VECTOR_EOF;
@@ -239,13 +240,9 @@ void state_update(State state, KeyState keys) {
 			Object obj = vector_node_value(state->objects, node);
 			if (obj->type == STAR)
 			{
-				if (/* state->info.ball->rect.x + state->info.ball->rect.width >= obj->rect.x 
-				&& state->info.ball->rect.y + state->info.ball->rect.height >= obj->rect.y 
-				&& state->info.ball->rect.y <= obj->rect.y + obj->rect.height 
-				&& state->info.ball->rect.x <= obj->rect.x + obj->rect.width */
-				CheckCollisionRecs(state->info.ball->rect, obj->rect))
+				if (CheckCollisionRecs(state->info.ball->rect, obj->rect))
 				{
-					vector_set_at(state->objects, vector_size(state->objects) - 1, vector_last(state->objects));
+					vector_set_at(state->objects, position, vector_last(state->objects));
 					vector_remove_last(state->objects);
 					state->info.score += 10;
 				}
@@ -255,15 +252,14 @@ void state_update(State state, KeyState keys) {
 			{
 				if (obj->vert_mov == FALLING && obj->rect.y + obj->rect.height >= SCREEN_HEIGHT)
 				{
-					vector_set_at(state->objects, vector_size(state->objects) - 1, vector_last(state->objects));
+					vector_set_at(state->objects, position, vector_last(state->objects));
 					vector_remove_last(state->objects);
 				}
 				if (state->info.ball->vert_mov == FALLING 
-				/*&& state->info.ball->rect.x + state->info.ball->rect.width >= obj->rect.x 
-				&& state->info.ball->rect.x <= obj->rect.x + obj->rect.width
-				&& state->info.ball->rect.y + state->info.ball->rect.height == obj->rect.y*/
 				&& CheckCollisionRecs(state->info.ball->rect, obj->rect))
 				{
+					if (obj->unstable)
+						obj->vert_mov = FALLING;
 					state->info.ball->vert_mov = IDLE;
 					state->info.ball->rect.y = obj->rect.y - state->info.ball->rect.height;
 				}
@@ -275,6 +271,7 @@ void state_update(State state, KeyState keys) {
 					max_platform_width = obj->rect.width;
 				}
 			}
+			position++;
 		}
 		
 		// Δημιουργία νέων αντικειμένων
@@ -284,7 +281,9 @@ void state_update(State state, KeyState keys) {
 			state->speed_factor *= 1.1; 				 //////////////////////   ΝΑ ΕΦΑΡΜΟΣΤΕΙ ///////////////////////
 		}
 		
-	} else if (keys->enter) {
+	} 
+	else if (keys->enter) 
+	{
 		state_create();			// επαναφορά στην αρχική κατάσταση
 	}
 
