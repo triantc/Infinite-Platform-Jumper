@@ -5,7 +5,7 @@
 //////////////////////////////////////////////////////////////////
 
 #include "acutest.h"			// Απλή βιβλιοθήκη για unit testing
-#include "../modules/set_utils.h"
+#include "set_utils.h"
 #include "state.h"
 
 void test_state_create() {

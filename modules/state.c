@@ -145,7 +145,7 @@ void state_update(State state, KeyState keys) {
 	if (state->info.playing) {
 		if (!state->info.paused)
 		{
-				// Οριζόντια κίνηση μπάλας
+			// Οριζόντια κίνηση μπάλας
 			if (keys->right)
 				state->info.ball->rect.x += 6 * state->speed_factor;
 			else if (keys->left)
@@ -183,23 +183,27 @@ void state_update(State state, KeyState keys) {
 				{
 					if (obj->vert_mov == MOVING_UP)
 					{
-						obj->rect.y -= obj->vert_speed;
+						obj->rect.y -= obj->vert_speed * state->speed_factor;
 						if (obj->rect.y <= SCREEN_HEIGHT/4)
+						{
 							obj->vert_mov = MOVING_DOWN;
+							obj->rect.y = SCREEN_HEIGHT/4;
+						}
 					}
 					else if (obj->vert_mov == MOVING_DOWN)
 					{
-						obj->rect.y += obj->vert_speed;
+						obj->rect.y += obj->vert_speed * state->speed_factor;
 						if (obj->rect.y >= 3*SCREEN_HEIGHT/4)
+						{
 							obj->vert_mov = MOVING_UP;
+							obj->rect.y = 3*SCREEN_HEIGHT/4;
+						}
 					}
 					else if (obj->vert_mov == FALLING)
-						obj->rect.y += 4;
+						obj->rect.y += 4 * state->speed_factor;
 				}
 			}
 			
-			
-
 			// Συμπεριφορά μπάλας σε κατακόρυφη ηρεμία (IDLE)
 			if (state->info.ball->vert_mov == IDLE)
 				for (VectorNode node = vector_first(state->objects);
@@ -211,7 +215,7 @@ void state_update(State state, KeyState keys) {
 					{
 						if (state->info.ball->rect.x + state->info.ball->rect.width >= obj->rect.x 
 						&& state->info.ball->rect.x <= obj->rect.x + obj->rect.width
-						&& state->info.ball->rect.y + state->info.ball->rect.height == obj->rect.y)
+						&& (int) state->info.ball->rect.y + (int) state->info.ball->rect.height == (int) obj->rect.y)
 						{
 							state->info.ball->rect.y = obj->rect.y - state->info.ball->rect.height;
 						}
@@ -252,8 +256,8 @@ void state_update(State state, KeyState keys) {
 						vector_remove_last(state->objects);
 					}
 					if (state->info.ball->vert_mov == FALLING 
-					&& CheckCollisionRecs(state->info.ball->rect, obj->rect)
-					&& state->info.ball->rect.y + state->info.ball->rect.height >= obj->rect.y)
+					&& (int) state->info.ball->rect.y + (int) state->info.ball->rect.height >= (int) obj->rect.y
+					&& CheckCollisionRecs(state->info.ball->rect, obj->rect))
 					{
 						if (obj->unstable)
 							obj->vert_mov = FALLING;
@@ -274,8 +278,8 @@ void state_update(State state, KeyState keys) {
 			// Δημιουργία νέων αντικειμένων
 			if (max_platform_x - state->info.ball->rect.x <= SCREEN_WIDTH)
 			{
-				add_objects(state, max_platform_x + max_platform_width);
 				state->speed_factor *= 1.1; 
+				add_objects(state, max_platform_x + max_platform_width);
 			}
 		
 			// Εκκίνηση και διακοπή
@@ -299,10 +303,9 @@ void state_update(State state, KeyState keys) {
 	else if (keys->enter) 
 	{
 		state_destroy(state);
+		srand(0);
 		state_create();			// επαναφορά στην αρχική κατάσταση
 	}
-
-	
 }
 
 // Καταστρέφει την κατάσταση state ελευθερώνοντας τη δεσμευμένη μνήμη.

@@ -1,9 +1,3 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// Παράδειγμα δημιουργίας ενός παιχνιδιού χρησιμοποιώντας τη βιβλιοθήκη raylib
-//
-//////////////////////////////////////////////////////////////////////////////
-
 #include <stdio.h>
 #include "raylib.h"
 
@@ -19,8 +13,8 @@ void update_and_draw() {
     keys.left = IsKeyDown(KEY_LEFT);
     keys.right = IsKeyDown(KEY_RIGHT);
     keys.n = IsKeyDown(KEY_N);
-    keys.p = IsKeyDown(KEY_P);
     keys.enter = IsKeyDown(KEY_ENTER);
+    keys.p = IsKeyPressed(KEY_P);
     
 	state_update(state, &keys);
 	interface_draw_frame(state);

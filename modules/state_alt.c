@@ -151,11 +151,12 @@ float* create_float(float value)
 
 List state_objects(State state, float x_from, float x_to) {
 	List objects = list_create(NULL);
-    if (set_find_eq_or_greater(state->objects, create_float(x_from)) != NULL &&
-    set_find_eq_or_smaller(state->objects, create_float(x_to)) != NULL)
+    Pointer ptr_x_from = set_find_eq_or_greater(state->objects, create_float(x_from));
+    Pointer ptr_x_to = set_find_eq_or_smaller(state->objects, create_float(x_to));
+    if (ptr_x_from != NULL && ptr_x_to != NULL)
     {
-        for (SetNode node = set_find_node(state->objects, set_find_eq_or_greater(state->objects, create_float(x_from)));
-        node != set_next(state->objects, set_find_node(state->objects, set_find_eq_or_smaller(state->objects, create_float(x_to))));
+        for (SetNode node = set_find_node(state->objects, ptr_x_from);
+        node != set_next(state->objects, set_find_node(state->objects, ptr_x_to));
         node = set_next(state->objects, node))
         {
             list_insert_next(objects, list_last(objects), set_node_value(state->objects, node));
@@ -170,153 +171,170 @@ List state_objects(State state, float x_from, float x_to) {
 void state_update(State state, KeyState keys) {
 
     if (state->info.playing) {
-        // Λίστα με τα αντικείμενα που βρίσκονται σε απόσταση το πολύ 2 οθόνων από τη μπάλα
-        List objects = state_objects(state, state->info.ball->rect.x - SCREEN_WIDTH * 2, state->info.ball->rect.x + SCREEN_WIDTH * 2);
+        if (!state->info.paused)
+		{
+            // Λίστα με τα αντικείμενα που βρίσκονται σε απόσταση το πολύ 2 οθόνων από τη μπάλα
+            List objects = state_objects(state, state->info.ball->rect.x - SCREEN_WIDTH * 2, state->info.ball->rect.x + SCREEN_WIDTH * 2);
 
-        // Οριζόντια κίνηση μπάλας
-        if (keys->right)
-            state->info.ball->rect.x += 6;
-        else if (keys->left)
-            state->info.ball->rect.x += 1;
-        else
-            state->info.ball->rect.x += 4;
-        
-        // Κατακόρυφη κίνηση μπάλας
-        if (state->info.ball->vert_mov == JUMPING)
-        {
-            state->info.ball->rect.y -= state->info.ball->vert_speed;
-            state->info.ball->vert_speed *= 0.85;
-            if (state->info.ball->vert_speed <= 0.5)
-                state->info.ball->vert_mov = FALLING;
-        }
-        else if (state->info.ball->vert_mov == FALLING)
-        {
-            state->info.ball->rect.y += state->info.ball->vert_speed;
-            if (state->info.ball->vert_speed < 7)
-                state->info.ball->vert_speed *= 1.1;
-        }
-        else if (state->info.ball->vert_mov == IDLE && keys->up)
-        {
-            state->info.ball->vert_mov = JUMPING;
-            state->info.ball->vert_speed = 17;
-        }
-        
-        // Κατακόρυφη κίνηση πλατφόρμας
-        for (ListNode node = list_first(objects);
-        node != LIST_EOF;
-        node = list_next(objects, node))
-        {
-            Object obj = list_node_value(objects, node);
-            if (obj->type == PLATFORM)
-            {
-                if (obj->vert_mov == MOVING_UP)
-                {
-                    obj->rect.y -= obj->vert_speed;
-                    if (obj->rect.y <= SCREEN_HEIGHT/4)
-                        obj->vert_mov = MOVING_DOWN;
-                }
-                else if (obj->vert_mov == MOVING_DOWN)
-                {
-                    obj->rect.y += obj->vert_speed;
-                    if (obj->rect.y >= 3*SCREEN_HEIGHT/4)
-                        obj->vert_mov = MOVING_UP;
-                }
-                else if (obj->vert_mov == FALLING)
-                    obj->rect.y += 4;
-            }
-        }
-        
-        // Εκκίνηση και διακοπή
-        if (state->info.playing == false && keys->enter)
-            state->info.playing = true;
-        if (keys->p)
-            state->info.paused = !state->info.paused;
-        if (keys->n && state->info.paused == true)
-            state_update(state, keys);
-
-        // Συμπεριφορά μπάλας σε κατακόρυφη ηρεμία (IDLE)
-        if (state->info.ball->vert_mov == IDLE)
+            // Οριζόντια κίνηση μπάλας
+			if (keys->right)
+				state->info.ball->rect.x += 6 * state->speed_factor;
+			else if (keys->left)
+				state->info.ball->rect.x += 1 * state->speed_factor;
+			else
+				state->info.ball->rect.x += 4 * state->speed_factor;
+            
+            // Κατακόρυφη κίνηση μπάλας
+			if (state->info.ball->vert_mov == JUMPING)
+			{
+				state->info.ball->rect.y -= state->info.ball->vert_speed;
+				state->info.ball->vert_speed *= 0.85;
+				if (state->info.ball->vert_speed <= 0.5)
+					state->info.ball->vert_mov = FALLING;
+			}
+			else if (state->info.ball->vert_mov == FALLING)
+			{
+				state->info.ball->rect.y += state->info.ball->vert_speed;
+				if (state->info.ball->vert_speed < 7)
+					state->info.ball->vert_speed *= 1.1;
+			}
+			else if (state->info.ball->vert_mov == IDLE && keys->up)
+			{
+				state->info.ball->vert_mov = JUMPING;
+				state->info.ball->vert_speed = 17;
+			}
+            
+            // Κατακόρυφη κίνηση πλατφόρμας
             for (ListNode node = list_first(objects);
             node != LIST_EOF;
             node = list_next(objects, node))
             {
                 Object obj = list_node_value(objects, node);
                 if (obj->type == PLATFORM)
-                {
-                    if (state->info.ball->rect.x + state->info.ball->rect.width >= obj->rect.x 
-                    && state->info.ball->rect.x <= obj->rect.x + obj->rect.width
-                    && (int)state->info.ball->rect.y + (int)state->info.ball->rect.height == (int)obj->rect.y)
-                    {
-                        state->info.ball->rect.y = obj->rect.y - state->info.ball->rect.height;
-                    }
-                    else
-                    {
-                        state->info.ball->vert_mov = FALLING;
-                        state->info.ball->vert_speed = 1.5;
-                    }
-                }
-            }
-        
-        // Συγκρούσεις
-        if (state->info.ball->rect.y >= SCREEN_HEIGHT - state->info.ball->rect.height)
-            state->info.playing = false;
-
-        // Βοηθάει για να αφαιρώ γρήγορα όταν χρειάζεται με list_remove_next
-        ListNode previous_node = list_first(objects);
-        float max_platform_x = 0, max_platform_width = 0;  // Χρησιμέυει στη δημιουργία νέων αντικειμένων αργότερα
-        for (ListNode node = list_first(objects);
-        node != LIST_EOF;
-        node = list_next(objects, node))
-        {
-            Object obj = list_node_value(objects, node);
-            if (obj->type == STAR)
-            {
-                if (/* state->info.ball->rect.x + state->info.ball->rect.width >= obj->rect.x 
-                && state->info.ball->rect.y + state->info.ball->rect.height >= obj->rect.y 
-                && state->info.ball->rect.y <= obj->rect.y + obj->rect.height 
-                && state->info.ball->rect.x <= obj->rect.x + obj->rect.width */
-                CheckCollisionRecs(state->info.ball->rect, obj->rect))
-                {
-                    list_remove_next(objects, previous_node);
-                    state->info.score += 10;
-                }
+				{
+					if (obj->vert_mov == MOVING_UP)
+					{
+						obj->rect.y -= obj->vert_speed * state->speed_factor;
+						if (obj->rect.y <= SCREEN_HEIGHT/4)
+						{
+							obj->vert_mov = MOVING_DOWN;
+							obj->rect.y = SCREEN_HEIGHT/4;
+						}
+					}
+					else if (obj->vert_mov == MOVING_DOWN)
+					{
+						obj->rect.y += obj->vert_speed * state->speed_factor;
+						if (obj->rect.y >= 3*SCREEN_HEIGHT/4)
+						{
+							obj->vert_mov = MOVING_UP;
+							obj->rect.y = 3*SCREEN_HEIGHT/4;
+						}
+					}
+					else if (obj->vert_mov == FALLING)
+						obj->rect.y += 4 * state->speed_factor;
+				}
             }
 
-            if (obj->type == PLATFORM)
-            {
-                if (obj->vert_mov == FALLING && obj->rect.y + obj->rect.height >= SCREEN_HEIGHT)
+            // Συμπεριφορά μπάλας σε κατακόρυφη ηρεμία (IDLE)
+            if (state->info.ball->vert_mov == IDLE)
+                for (ListNode node = list_first(objects);
+                node != LIST_EOF;
+                node = list_next(objects, node))
                 {
-                    list_remove_next(objects, previous_node);
+                    Object obj = list_node_value(objects, node);
+                    if (obj->type == PLATFORM)
+					{
+						if (state->info.ball->rect.x + state->info.ball->rect.width >= obj->rect.x 
+						&& state->info.ball->rect.x <= obj->rect.x + obj->rect.width
+						&& (int) state->info.ball->rect.y + (int) state->info.ball->rect.height == (int) obj->rect.y)
+						{
+							state->info.ball->rect.y = obj->rect.y - state->info.ball->rect.height;
+						}
+						else
+						{
+							state->info.ball->vert_mov = FALLING;
+							state->info.ball->vert_speed = 1.5;
+						}
+					}
                 }
-                if (state->info.ball->vert_mov == FALLING 
-				/*&& state->info.ball->rect.x + state->info.ball->rect.width >= obj->rect.x 
-				&& state->info.ball->rect.x <= obj->rect.x + obj->rect.width
-				&& state->info.ball->rect.y + state->info.ball->rect.height == obj->rect.y*/
-				&& CheckCollisionRecs(state->info.ball->rect, obj->rect))
-                {
-                    state->info.ball->vert_mov = IDLE;
-                    state->info.ball->rect.y = obj->rect.y - state->info.ball->rect.height;
-                }
+            
+            // Συγκρούσεις
+            if (state->info.ball->rect.y >= SCREEN_HEIGHT - state->info.ball->rect.height)
+                state->info.playing = false;
 
-                // Χρησιμέυει στη δημιουργία νέων αντικειμένων αργότερα
-                if (obj->rect.x > max_platform_x)
-                {
-                    max_platform_x = obj->rect.x;
-                    max_platform_width = obj->rect.width;
-                }
-            }
             // Βοηθάει για να αφαιρώ γρήγορα όταν χρειάζεται με list_remove_next
-            previous_node = node;
+            ListNode previous_node = list_first(objects);
+            float max_platform_x = 0, max_platform_width = 0;  // Χρησιμέυει στη δημιουργία νέων αντικειμένων αργότερα
+            for (ListNode node = list_first(objects);
+            node != LIST_EOF;
+            node = list_next(objects, node))
+            {
+                Object obj = list_node_value(objects, node);
+                if (obj->type == STAR)
+                {
+                    if (CheckCollisionRecs(state->info.ball->rect, obj->rect))
+                    {
+                        list_remove_next(objects, previous_node);
+                        state->info.score += 10;
+                    }
+                }
+
+                if (obj->type == PLATFORM)
+                {
+                    if (obj->vert_mov == FALLING && obj->rect.y + obj->rect.height >= SCREEN_HEIGHT)
+                    {
+                        list_remove_next(objects, previous_node);
+                    }
+                    if (state->info.ball->vert_mov == FALLING
+                    && (int) state->info.ball->rect.y + (int) state->info.ball->rect.height >= (int) obj->rect.y 
+                    && CheckCollisionRecs(state->info.ball->rect, obj->rect))
+                    {
+                       if (obj->unstable)
+							obj->vert_mov = FALLING;
+						state->info.ball->vert_mov = IDLE;
+						state->info.ball->rect.y = obj->rect.y - state->info.ball->rect.height;
+                    }
+
+                    // Χρησιμέυει στη δημιουργία νέων αντικειμένων αργότερα
+                    if (obj->rect.x > max_platform_x)
+                    {
+                        max_platform_x = obj->rect.x;
+                        max_platform_width = obj->rect.width;
+                    }
+                }
+                // Βοηθάει για να αφαιρώ γρήγορα όταν χρειάζεται με list_remove_next
+                previous_node = node;
+            }
+            
+            // Δημιουργία νέων αντικειμένων
+			if (max_platform_x - state->info.ball->rect.x <= SCREEN_WIDTH)
+			{
+				state->speed_factor *= 1.1; 
+				add_objects(state, max_platform_x + max_platform_width);
+			}
+		
+			// Εκκίνηση και διακοπή
+			if (state->info.playing == false && keys->enter)
+				state->info.playing = true;
+			if (keys->p)
+				state->info.paused = true;
         }
-        
-        // Δημιουργία νέων αντικειμένων
-        if (max_platform_x - state->info.ball->rect.x <= SCREEN_WIDTH)
+        else
         {
-            add_objects(state, max_platform_x + max_platform_width);
-            state->speed_factor *= 1.1; 				 //////////////////////   ΝΑ ΕΦΑΡΜΟΣΤΕΙ ///////////////////////
+            if (keys->n)
+			{
+				state->info.paused = false;
+				state_update(state, keys);
+				state->info.paused = true;
+			}
+			if (keys->p)
+				state->info.paused = false;
         }
-    } else if (keys->enter) {
-		state_create();		// επαναφορά στην αρχική κατάσταση
+    }
+    else if (keys->enter) {
+		state_destroy(state);
+		srand(0);
+		state_create();			// επαναφορά στην αρχική κατάσταση
 	}
 }
 
@@ -324,4 +342,6 @@ void state_update(State state, KeyState keys) {
 
 void state_destroy(State state) {
 	// Προς υλοποίηση
+    free(state->objects);
+	free(state);
 }
