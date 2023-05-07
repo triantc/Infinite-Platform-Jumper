@@ -103,15 +103,6 @@ void test_state_update() {
 	TEST_ASSERT( new_rect.x == old_rect.x + 1 );
 	keys.left = false;
 
-	// // Όταν vert_mov == JUMPING
-	// state_info(state)->ball->vert_mov = JUMPING;
-	// state_info(state)->ball->vert_speed = 0.5;
-	// state_update(state, &keys); 
-	// new_rect = state_info(state)->ball->rect;
-	// TEST_ASSERT( new_rect.y == old_rect.y - 0.5);
-	// // Μετά το update θα γίνει vert_mov = FALLING επειδή το vert_speed = 0.5 * 0.85 <= 0.5
-	// TEST_ASSERT(state_info(state)->ball->vert_mov == FALLING);
-
 	// Όταν vert_mov == IDLE και πατημένο το πάνω βέλος
 	state_info(state)->ball->vert_mov = IDLE;
 	keys.up = true;
@@ -141,13 +132,6 @@ void test_state_update() {
 		}
 		if (obj->type == PLATFORM)
 		{
-			// state_info(state)->ball->vert_mov = FALLING;
-			// state_info(state)->ball->rect.x = obj->rect.x;
-			// state_info(state)->ball->rect.y = obj->rect.y - state_info(state)->ball->rect.height;
-			// state_info(state)->ball->vert_speed = 0;
-			// state_update(state, &keys);
-			// TEST_ASSERT(state_info(state)->ball->vert_mov == IDLE);
-
 			state_info(state)->ball->vert_mov = IDLE;
 			state_info(state)->ball->rect.x = obj->rect.x - state_info(state)->ball->rect.width;
 			state_info(state)->ball->rect.y = obj->rect.y - state_info(state)->ball->rect.height;
