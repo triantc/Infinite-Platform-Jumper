@@ -265,7 +265,8 @@ void state_update(State state, KeyState keys) {
 						state->info.ball->rect.y = obj->rect.y - state->info.ball->rect.height;
 					}
 
-					// Χρησιμέυει στη δημιουργία νέων αντικειμένων αργότερα
+					// Κρατάμε την τετμημένη και το πλάτος της τελευταιας πλατφόρμας τα οποία
+					// χρησιμέυουν στη δημιουργία νέων αντικειμένων αργότερα
 					if (obj->rect.x > max_platform_x)
 					{
 						max_platform_x = obj->rect.x;

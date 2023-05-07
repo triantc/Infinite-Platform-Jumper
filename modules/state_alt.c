@@ -289,13 +289,14 @@ void state_update(State state, KeyState keys) {
                     && (int) state->info.ball->rect.y + (int) state->info.ball->rect.height >= (int) obj->rect.y 
                     && CheckCollisionRecs(state->info.ball->rect, obj->rect))
                     {
-                       if (obj->unstable)
+                       	if (obj->unstable)
 							obj->vert_mov = FALLING;
 						state->info.ball->vert_mov = IDLE;
 						state->info.ball->rect.y = obj->rect.y - state->info.ball->rect.height;
                     }
 
-                    // Χρησιμέυει στη δημιουργία νέων αντικειμένων αργότερα
+                    // Κρατάμε την τετμημένη και το πλάτος της τελευταιας πλατφόρμας τα οποία
+					// χρησιμέυουν στη δημιουργία νέων αντικειμένων αργότερα
                     if (obj->rect.x > max_platform_x)
                     {
                         max_platform_x = obj->rect.x;
