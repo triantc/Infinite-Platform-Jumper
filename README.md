@@ -1,36 +1,22 @@
-![run-tests](../../workflows/run-tests/badge.svg)
+# 👻 Infinite Platform Jumper
 
-## 2023 Project 1
+**Infinite Platform Jumper** is an endless-platform jumping game where the player controls a character that must jump between moving platforms and collect coins. The longer you stay alive, the higher your score, but be careful not to fall!
 
-Εκφώνηση: https://k08.chatzi.org/projects/project1/
+![Game Screenshot](game_screenshot.png) 
 
+## Features
+- **Endless Platforms**: The game generates an infinite number of platforms, so you never run out of challenges.
+- **Collect Coins**: Jump to collect coins and increase your score.
+- **Smooth Movement**: Fluid character controls and smooth platforming mechanics.
+- **Dynamic Obstacles**: Platforms move up and down, adding an extra layer of difficulty to the game.
 
-### Προσωπικά στοιχεία
+## How to Play
+- **Jump**: Use the spacebar or the "Enter" key to jump.
+- **Collect Coins**: The goal is to jump and collect as many coins as possible.
+- **Avoid Falling**: Don't fall off the platforms or you'll have to start over.
+- **Score**: Your score increases with each coin you collect.
 
-__Όνομα__: Χρήστος-Δημήτριος Τριανταφυλλόπουλος
-
-__Α.Μ.__: 1115202200191 / sdi2200191
-
-### Ασκήσεις που παραδίδονται
-
-Συμπληρώστε εδώ τις ασκήσεις (και τυχόν bonus) που παραδίδετε. Αν κάποια άσκηση
-βρίσκεται σε μη αναμενόμενα αρχεία αναφέρετε και τα αρχεία αυτά.
-
-- Άσκηση 1 (Υλοποιημένη πλήρως)
-- Άσκηση 2 (Υλοποιημένη πλήρως)
-- Άσκηση 3 (Υλοποιημένη πλήρως)*
-- Άσκηση 4 (Υλοποιημένη πλήρως)
-- Άσκηση 5 (Έχω προσπαθήσει να την υλοποιήσω όσο μπορούσα)
-- Άσκηση 6 (Υλοποιημένη πλήρως)
-
-### Documentation
-
-Συμπληρώστε εδώ __όσο documentation χρειάζεται__ ώστε οι βαθμολογητές να
-κατανοήσουν πλήρως τις λύσεις σας και να τις βαθμολογήσουν ανάλογα. Αυτό θα
-πρέπει να γίνει ανεξάρτητα με το αν ο κώδικάς σας είναι καλά σχολιασμένος,
-πράγμα που συνιστάται.
-
-state.c : * Στην άσκηση 3 στο συγκεκριμένο κομμάτι "Αν η συντεταγμένη x βρίσκεται στα όρια κάποιας πλατφόρμας τότε η συντεταγμένη y τροποποιείται ώστε η μπάλα να ακολουθεί σε ύψος την πλατφόρμα."
-δεν έχω καταφέρει να το επιτύχω πλήρως και όταν η πλατφόρμα πηγαίνει με μεγάλη ταχύτητα προς τα κάτω η μπάλα χοροπηδάει/κάνει "bounce".
-
-state_alt.c : Προσπάθησα να μετατρέψω την υλοποίηση με vector σε υλοποίηση με set, αλλά τρώω seg fault και δεν περνάει επίσης τα test
+## Game Instructions
+1. Press `Enter` to start the game.
+2. Use arrow keys or the spacebar to control your character's jump.
+3. The game ends when you fall off the screen. Press `Enter` again to play.
